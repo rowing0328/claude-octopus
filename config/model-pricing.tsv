@@ -34,6 +34,8 @@ model	o3-pro	20.00	80.00	OpenAI reasoning Pro
 model	o3-mini	1.10	4.40	OpenAI reasoning budget
 model	agy/default	0.00	0.00	Antigravity access
 model	auto	0.00	0.00	Copilot subscription auto selector
+model	claude-haiku-5-5	0.10	0.50	Anthropic current Haiku
+request-rule	claude-haiku-5-5	100000	5.00	5.00	Whole-request multiplier when input exceeds threshold
 model	claude-haiku-4.5	1.00	5.00	Anthropic
 model	claude-sonnet-5-5	2.00	10.00	Anthropic current Sonnet
 model	claude-sonnet-5	2.00	10.00	Anthropic

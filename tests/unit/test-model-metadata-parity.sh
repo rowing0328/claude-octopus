@@ -79,13 +79,43 @@ if [[ "$(get_model_catalog gpt-6.1-sol)" == "1050|yes|yes|yes|codex|standard|act
       "$(get_model_catalog gpt-6-sol)" == "1050|yes|yes|yes|codex|standard|active" &&
       "$(get_model_catalog gpt-6-luna)" == "1050|yes|yes|yes|codex|budget|active" &&
       "$(get_model_catalog claude-sonnet-5-5)" == "1000|yes|yes|yes|claude|standard|active" &&
+      "$(get_model_catalog claude-haiku-5-5)" == "1000|yes|yes|yes|claude|budget|active" &&
       "$(get_model_pricing openai/gpt-6.1-sol:nitro)" == "2.00:10.00" &&
       "$(get_model_pricing gpt-6-sol)" == "2.00:10.00" &&
       "$(get_model_pricing gpt-6-luna)" == "0.10:0.50" &&
-      "$(get_model_pricing claude-sonnet-5-5)" == "2.00:10.00" ]]; then
+      "$(get_model_pricing claude-sonnet-5-5)" == "2.00:10.00" &&
+      "$(get_model_pricing claude-haiku-5-5)" == "0.10:0.50" ]]; then
     test_pass
 else
     test_fail "current model metadata or namespaced pricing is missing"
+fi
+
+test_case "Haiku 5.5 is admitted to automatic capabilities and phase routes"
+config_home="$TEST_TMP_DIR/haiku-config-home"
+mkdir -p "$config_home"
+if env "HOME=${config_home}" bash "$PROJECT_ROOT/scripts/helpers/octo-model-config.sh" set claude.budget claude-haiku-5-5 >/dev/null 2>&1 &&
+   env "HOME=${config_home}" bash "$PROJECT_ROOT/scripts/helpers/octo-model-config.sh" route quick claude:budget >/dev/null 2>&1 &&
+   jq -e '.providers.claude.budget == "claude-haiku-5-5"' "$config_home/.claude-octopus/config/providers.json" >/dev/null; then
+    test_pass
+else
+    test_fail "claude-haiku-5-5 was rejected as an explicit-only model"
+fi
+
+test_case "Haiku 5.5 pricing changes only above 100000 input tokens"
+if PRICING_FILE="$pricing_file" python3 - <<'PY'
+import os, subprocess
+root = os.path.dirname(os.path.dirname(os.environ["PRICING_FILE"]))
+for input_tokens in (99999, 100000, 100001):
+    command = 'source "$1/scripts/lib/models.sh"; source "$1/scripts/lib/cost.sh"; is_api_based_provider() { return 0; }; estimate_tokens() { printf "%s" "$test_input_tokens"; }; test_input_tokens="$3"; estimate_agent_call_cost claude-sdk "$2" ignored'
+    actual = float(subprocess.check_output(["bash", "-c", command, "test", root, "anthropic/claude-haiku-5-5", str(input_tokens)], text=True))
+    input_rate, output_rate = (.5, 2.5) if input_tokens > 100000 else (.1, .5)
+    expected = (input_tokens * input_rate + input_tokens * 2 * output_rate) / 1e6
+    assert abs(actual - expected) < .000001, (input_tokens, actual, expected)
+PY
+then
+    test_pass
+else
+    test_fail "Haiku 5.5 pricing lost the 100000-token rate card"
 fi
 
 test_case "GPT-6 long-context pricing changes only above 272000 input tokens"

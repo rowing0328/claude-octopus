@@ -107,6 +107,7 @@ and [Agent SDK thinking types](https://code.claude.com/docs/en/agent-sdk/python#
 | GPT-5.6 Luna | budget Codex alternative | $0.20 / $1.20 |
 | Claude Sonnet 5.5 | standard Claude orchestration and synthesis on supported clients | $2 / $10 |
 | Claude Sonnet 5 | standard Claude fallback on older clients | $2 / $10 |
+| Claude Haiku 5.5 | opt-in budget Claude work through a `claude.budget` pin; prompts above 100K tokens cost $0.50 / $2.50 | $0.10 / $0.50 |
 | Claude Haiku 4.5 | budget Claude work | $1 / $5 |
 | Claude Fable 5.1 | opt-in judgment-class escalation, at most one automatic escalation per run | $10 / $50 |
 | GPT-6 Astra | opt-in OpenAI-family escalation after Sol fails a hard acceptance test | $10 / $50 |

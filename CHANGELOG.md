@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `claude-haiku-5-5` is in the model catalog ($0.10/$0.50 per MTok, 1M context),
+  so a `providers.json` capability or route that names it is no longer rejected
+  as explicit-only. Prompts above 100K tokens price at the $0.50/$2.50 rate card.
+  The default `budget` seat stays on Haiku 4.5; a saved pin selects Haiku 5.5.
+
 ## [11.15.4] - 2026-11-01
 
 ### Fixed
